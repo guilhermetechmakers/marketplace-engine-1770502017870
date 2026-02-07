@@ -1,8 +1,10 @@
-import { Link } from 'react-router-dom'
-import { Menu, Search, ShoppingCart, User } from 'lucide-react'
+import { useState } from 'react'
+import { Link, useNavigate } from 'react-router-dom'
+import { Menu, Search, ShoppingCart, User, LogOut } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { cn } from '@/lib/utils'
+import { useAuth } from '@/context/auth-context'
 
 interface NavbarProps {
   className?: string
@@ -11,6 +13,26 @@ interface NavbarProps {
 }
 
 export function Navbar({ className, onMenuClick, showSearch = true }: NavbarProps) {
+  const { user, isAuthenticated, logout } = useAuth()
+  const [isLoggingOut, setIsLoggingOut] = useState(false)
+  const navigate = useNavigate()
+
+  const handleLogout = async () => {
+    setIsLoggingOut(true)
+    try {
+      await logout()
+      navigate('/')
+    } finally {
+      setIsLoggingOut(false)
+    }
+  }
+
+  const dashboardPath = user
+    ? user.role === 'operator' || user.role === 'admin'
+      ? '/dashboard/admin'
+      : `/dashboard/${user.role}`
+    : '/dashboard/buyer'
+
   return (
     <header
       className={cn(
@@ -60,19 +82,44 @@ export function Navbar({ className, onMenuClick, showSearch = true }: NavbarProp
               <ShoppingCart className="h-5 w-5" />
             </Button>
           </Link>
-          <Link to="/login">
-            <Button variant="ghost" size="icon" aria-label="Account">
-              <User className="h-5 w-5" />
-            </Button>
-          </Link>
-          <Link to="/login" className="hidden sm:block">
-            <Button variant="outline" size="sm">
-              Sign In
-            </Button>
-          </Link>
-          <Link to="/signup" className="hidden sm:block">
-            <Button size="sm">Get Started</Button>
-          </Link>
+          {isAuthenticated && user ? (
+            <>
+              <Link to={dashboardPath}>
+                <Button variant="ghost" size="icon" aria-label="Dashboard">
+                  <User className="h-5 w-5" />
+                </Button>
+              </Link>
+              <span className="hidden text-sm text-muted-foreground sm:block max-w-[120px] truncate">
+                {user.name}
+              </span>
+              <Button
+                variant="outline"
+                size="sm"
+                onClick={handleLogout}
+                disabled={isLoggingOut}
+                className="hidden sm:flex"
+              >
+                <LogOut className="h-4 w-4" />
+                Sign Out
+              </Button>
+            </>
+          ) : (
+            <>
+              <Link to="/login">
+                <Button variant="ghost" size="icon" aria-label="Account">
+                  <User className="h-5 w-5" />
+                </Button>
+              </Link>
+              <Link to="/login" className="hidden sm:block">
+                <Button variant="outline" size="sm">
+                  Sign In
+                </Button>
+              </Link>
+              <Link to="/auth" className="hidden sm:block">
+                <Button size="sm">Get Started</Button>
+              </Link>
+            </>
+          )}
         </nav>
       </div>
     </header>

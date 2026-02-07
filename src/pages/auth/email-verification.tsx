@@ -1,15 +1,21 @@
-import { Link, useSearchParams } from 'react-router-dom'
+import { Link, useSearchParams, useNavigate } from 'react-router-dom'
 import { CheckCircle, XCircle, Loader2 } from 'lucide-react'
+import { toast } from 'sonner'
 import { Button } from '@/components/ui/button'
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
+import { AuthLayout } from '@/components/auth/auth-layout'
+import { AuthCard } from '@/components/auth/auth-card'
+import { verifyEmail, getAuthErrorMessage } from '@/api/auth'
+import { useAuth } from '@/context/auth-context'
 import { useState, useEffect } from 'react'
 
-type Status = 'loading' | 'success' | 'failed' | 'expired'
+type Status = 'loading' | 'success' | 'failed'
 
 export function EmailVerificationPage() {
   const [searchParams] = useSearchParams()
   const token = searchParams.get('token')
   const [status, setStatus] = useState<Status>('loading')
+  const navigate = useNavigate()
+  const { setUser } = useAuth()
 
   useEffect(() => {
     if (!token) {
@@ -18,71 +24,74 @@ export function EmailVerificationPage() {
     }
     const verify = async () => {
       try {
-        await new Promise((r) => setTimeout(r, 1500))
+        const res = await verifyEmail(token)
+        setUser(res.user)
         setStatus('success')
-      } catch {
+        toast.success('Email verified successfully')
+      } catch (err) {
+        toast.error(getAuthErrorMessage(err))
         setStatus('failed')
       }
     }
     verify()
-  }, [token])
+  }, [token, setUser])
 
   if (status === 'loading') {
     return (
-      <div className="min-h-screen bg-gradient-to-br from-mint to-background flex items-center justify-center p-4">
-        <Card className="w-full max-w-md">
-          <CardContent className="flex flex-col items-center justify-center py-12">
+      <AuthLayout>
+        <AuthCard title="" description="">
+          <div className="flex flex-col items-center justify-center py-12">
             <Loader2 className="h-12 w-12 animate-spin text-fresh" />
             <p className="mt-4 text-muted-foreground">Verifying your email...</p>
-          </CardContent>
-        </Card>
-      </div>
+          </div>
+        </AuthCard>
+      </AuthLayout>
     )
   }
 
   if (status === 'success') {
     return (
-      <div className="min-h-screen bg-gradient-to-br from-mint to-background flex items-center justify-center p-4">
-        <Card className="w-full max-w-md">
-          <CardHeader className="text-center">
+      <AuthLayout>
+        <AuthCard title="Email Verified" description="">
+          <div className="text-center">
             <div className="mx-auto flex h-12 w-12 items-center justify-center rounded-full bg-fresh/10">
               <CheckCircle className="h-6 w-6 text-fresh" />
             </div>
-            <CardTitle className="text-2xl">Email Verified</CardTitle>
-            <CardDescription>
+            <p className="mt-4 text-muted-foreground">
               Your email has been successfully verified. You can now sign in to your account.
-            </CardDescription>
-          </CardHeader>
-          <CardContent className="flex flex-col gap-4">
-            <Link to="/login">
-              <Button className="w-full">Sign In</Button>
-            </Link>
-            <Link to="/dashboard/buyer">
-              <Button variant="outline" className="w-full">
+            </p>
+            <div className="mt-6 flex flex-col gap-2">
+              <Link to="/login">
+                <Button className="w-full">Sign In</Button>
+              </Link>
+              <Button
+                variant="outline"
+                className="w-full"
+                onClick={() => navigate('/dashboard/buyer')}
+              >
                 Go to Dashboard
               </Button>
-            </Link>
-          </CardContent>
-        </Card>
-      </div>
+            </div>
+          </div>
+        </AuthCard>
+      </AuthLayout>
     )
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-mint to-background flex items-center justify-center p-4">
-      <Card className="w-full max-w-md">
-        <CardHeader className="text-center">
-          <div className="mx-auto flex h-12 w-12 items-center justify-center rounded-full bg-destructive/10">
-            <XCircle className="h-6 w-6 text-destructive" />
-          </div>
-          <CardTitle className="text-2xl">Verification Failed</CardTitle>
-          <CardDescription>
-            {!token
-              ? 'No verification token was provided.'
-              : 'Your verification link may have expired. Please request a new one.'}
-          </CardDescription>
-        </CardHeader>
-        <CardContent className="flex flex-col gap-4">
+    <AuthLayout>
+      <AuthCard
+        title="Verification Failed"
+        description={
+          !token
+            ? 'No verification token was provided.'
+            : 'Your verification link may have expired. Please request a new one.'
+        }
+      >
+        <div className="mx-auto flex h-12 w-12 items-center justify-center rounded-full bg-destructive/10">
+          <XCircle className="h-6 w-6 text-destructive" />
+        </div>
+        <div className="mt-6 flex flex-col gap-2">
           <Link to="/login">
             <Button className="w-full">Back to Sign In</Button>
           </Link>
@@ -91,8 +100,8 @@ export function EmailVerificationPage() {
               Resend Verification Email
             </Button>
           </Link>
-        </CardContent>
-      </Card>
-    </div>
+        </div>
+      </AuthCard>
+    </AuthLayout>
   )
 }

@@ -22,14 +22,19 @@ export function LandingPage() {
               and operators with dynamic listings, Stripe Connect, and trust & safety tooling.
             </p>
             <div className="mt-10 flex flex-col items-center justify-center gap-4 sm:flex-row">
-              <Link to="/signup">
-                <Button size="lg" className="h-12 px-8 text-base">
-                  Create Marketplace
+              <Link to="/auth">
+                <Button size="lg" className="h-12 px-8 text-base transition-transform hover:scale-[1.02]">
+                  Get Started
                   <ArrowRight className="ml-2 h-5 w-5" />
                 </Button>
               </Link>
+              <Link to="/search">
+                <Button variant="outline" size="lg" className="h-12 px-8 transition-transform hover:scale-[1.02]">
+                  Browse as Guest
+                </Button>
+              </Link>
               <Link to="/login">
-                <Button variant="outline" size="lg" className="h-12 px-8">
+                <Button variant="secondary" size="lg" className="h-12 px-8 transition-transform hover:scale-[1.02]">
                   Sign In
                 </Button>
               </Link>
@@ -124,9 +129,12 @@ export function LandingPage() {
                 marketplaces.
               </CardDescription>
             </CardHeader>
-            <CardContent className="flex justify-center pb-8">
-              <Link to="/signup">
+            <CardContent className="flex flex-wrap justify-center gap-4 pb-8">
+              <Link to="/auth">
                 <Button size="lg">Get Started Free</Button>
+              </Link>
+              <Link to="/search">
+                <Button variant="outline" size="lg">Browse as Guest</Button>
               </Link>
             </CardContent>
           </Card>

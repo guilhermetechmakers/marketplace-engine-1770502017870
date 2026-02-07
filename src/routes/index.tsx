@@ -1,13 +1,18 @@
 import { createBrowserRouter, RouterProvider } from 'react-router-dom'
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query'
 import { Toaster } from 'sonner'
+import { ProtectedRoute } from '@/components/auth/protected-route'
 import { DashboardLayout } from '@/components/layout/dashboard-layout'
 import { LandingPage } from '@/pages/landing'
+import { AuthChoicePage } from '@/pages/auth/auth-choice'
 import { LoginPage } from '@/pages/auth/login'
 import { SignupPage } from '@/pages/auth/signup'
 import { ForgotPasswordPage } from '@/pages/auth/forgot-password'
 import { ResetPasswordPage } from '@/pages/auth/reset-password'
 import { EmailVerificationPage } from '@/pages/auth/email-verification'
+import { OperatorAuthPage } from '@/pages/auth/operator-auth'
+import { AdminAuthPage } from '@/pages/auth/admin-auth'
+import { SellerAuthPage } from '@/pages/auth/seller-auth'
 import { BuyerOverviewPage } from '@/pages/dashboard/buyer-overview'
 import { BuyerOrdersPage } from '@/pages/dashboard/buyer-orders'
 import { BuyerMessagesPage } from '@/pages/dashboard/buyer-messages'
@@ -41,8 +46,12 @@ const queryClient = new QueryClient()
 
 const router = createBrowserRouter([
   { path: '/', element: <LandingPage /> },
+  { path: '/auth', element: <AuthChoicePage /> },
   { path: '/login', element: <LoginPage /> },
   { path: '/signup', element: <SignupPage /> },
+  { path: '/auth/operator', element: <OperatorAuthPage /> },
+  { path: '/auth/admin', element: <AdminAuthPage /> },
+  { path: '/auth/seller', element: <SellerAuthPage /> },
   { path: '/forgot-password', element: <ForgotPasswordPage /> },
   { path: '/reset-password', element: <ResetPasswordPage /> },
   { path: '/verify-email', element: <EmailVerificationPage /> },
@@ -53,14 +62,25 @@ const router = createBrowserRouter([
   { path: '/listings/create', element: <CreateListingPage /> },
   { path: '/listings/:id/edit', element: <EditListingPage /> },
   { path: '/listings/:id', element: <ListingDetailPage /> },
-  { path: '/onboarding/seller', element: <SellerOnboardingPage /> },
+  {
+    path: '/onboarding/seller',
+    element: (
+      <ProtectedRoute requiredRole="seller">
+        <SellerOnboardingPage />
+      </ProtectedRoute>
+    ),
+  },
   { path: '/docs', element: <DocsPage /> },
   { path: '/privacy', element: <PrivacyPage /> },
   { path: '/terms', element: <TermsPage /> },
   { path: '/cookies', element: <CookiesPage /> },
   {
     path: '/dashboard/buyer',
-    element: <DashboardLayout role="buyer" />,
+    element: (
+      <ProtectedRoute requiredRole="buyer">
+        <DashboardLayout role="buyer" />
+      </ProtectedRoute>
+    ),
     children: [
       { index: true, element: <BuyerOverviewPage /> },
       { path: 'orders', element: <BuyerOrdersPage /> },
@@ -70,7 +90,11 @@ const router = createBrowserRouter([
   },
   {
     path: '/dashboard/seller',
-    element: <DashboardLayout role="seller" />,
+    element: (
+      <ProtectedRoute requiredRole="seller">
+        <DashboardLayout role="seller" />
+      </ProtectedRoute>
+    ),
     children: [
       { index: true, element: <SellerOverviewPage /> },
       { path: 'listings', element: <SellerListingsPage /> },
@@ -81,7 +105,11 @@ const router = createBrowserRouter([
   },
   {
     path: '/dashboard/admin',
-    element: <DashboardLayout role="admin" />,
+    element: (
+      <ProtectedRoute requiredRole="admin">
+        <DashboardLayout role="admin" />
+      </ProtectedRoute>
+    ),
     children: [
       { index: true, element: <AdminOverviewPage /> },
       { path: 'moderation', element: <ModerationPage /> },

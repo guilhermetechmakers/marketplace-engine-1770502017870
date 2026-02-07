@@ -1,6 +1,6 @@
 /** API utilities using native fetch */
 
-const API_BASE = import.meta.env.VITE_API_URL ?? '/api'
+const API_BASE = (import.meta as ImportMeta & { env?: { VITE_API_URL?: string } }).env?.VITE_API_URL ?? '/api'
 
 export interface ApiError {
   message: string

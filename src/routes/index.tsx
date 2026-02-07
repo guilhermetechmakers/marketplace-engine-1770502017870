@@ -1,4 +1,5 @@
 import { createBrowserRouter, RouterProvider, Outlet } from 'react-router-dom'
+import { TooltipProvider } from '@/components/ui/tooltip'
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query'
 import { Toaster } from 'sonner'
 import { ProtectedRoute } from '@/components/auth/protected-route'
@@ -33,6 +34,7 @@ import { AdminUsersPage } from '@/pages/admin/users'
 import { AdminAnalyticsPage } from '@/pages/admin/analytics'
 import { SettingsPage } from '@/pages/dashboard/settings'
 import { CreateListingPage } from '@/pages/listings/create-listing'
+import CreateListingPageLegacy from '@/pages/CreateListingPage'
 import { EditListingPage } from '@/pages/listings/edit-listing'
 import { ListingDetailPage } from '@/pages/listings/listing-detail'
 import { SearchPage } from '@/pages/listings/search'
@@ -64,9 +66,32 @@ const router = createBrowserRouter([
   { path: '/cart', element: <CartPage /> },
   { path: '/checkout', element: <CheckoutPage /> },
   { path: '/orders', element: <OrdersPage /> },
-  { path: '/listings/create', element: <CreateListingPage /> },
-  { path: '/listings/:id/edit', element: <EditListingPage /> },
+  {
+    path: '/listings/create',
+    element: (
+      <ProtectedRoute requiredRole="seller">
+        <CreateListingPage />
+      </ProtectedRoute>
+    ),
+  },
+  {
+    path: '/create-listing-page',
+    element: (
+      <ProtectedRoute requiredRole="seller">
+        <CreateListingPageLegacy />
+      </ProtectedRoute>
+    ),
+  },
+  {
+    path: '/listings/:id/edit',
+    element: (
+      <ProtectedRoute requiredRole="seller">
+        <EditListingPage />
+      </ProtectedRoute>
+    ),
+  },
   { path: '/listings/:id', element: <ListingDetailPage /> },
+  { path: '/listing-detail-page/:id', element: <ListingDetailPage /> },
   {
     path: '/onboarding/seller',
     element: (
@@ -142,8 +167,10 @@ const router = createBrowserRouter([
 export function AppRouter() {
   return (
     <QueryClientProvider client={queryClient}>
-      <RouterProvider router={router} />
-      <Toaster position="top-right" richColors />
+      <TooltipProvider delayDuration={200}>
+        <RouterProvider router={router} />
+        <Toaster position="top-right" richColors />
+      </TooltipProvider>
     </QueryClientProvider>
   )
 }

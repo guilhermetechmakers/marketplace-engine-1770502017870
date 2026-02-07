@@ -1,4 +1,4 @@
-import { createBrowserRouter, RouterProvider } from 'react-router-dom'
+import { createBrowserRouter, RouterProvider, Outlet } from 'react-router-dom'
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query'
 import { Toaster } from 'sonner'
 import { ProtectedRoute } from '@/components/auth/protected-route'
@@ -22,7 +22,12 @@ import { SellerOrdersPage } from '@/pages/dashboard/seller-orders'
 import { SellerPayoutsPage } from '@/pages/dashboard/seller-payouts'
 import { AdminOverviewPage } from '@/pages/dashboard/admin-overview'
 import { ModerationPage } from '@/pages/admin/moderation'
-import { ConfigConsolePage } from '@/pages/admin/config-console'
+import { ConfigConsolePage } from '@/pages/admin/config/config-console'
+import { CategoryTaxonomyPage } from '@/pages/admin/config/category-taxonomy'
+import { ListingSchemasPage } from '@/pages/admin/config/listing-schemas'
+import { FeesCommissionsPage } from '@/pages/admin/config/fees-commissions'
+import { FeatureFlagsPage } from '@/pages/admin/config/feature-flags'
+import { MarketplaceSettingsPage } from '@/pages/admin/config/marketplace-settings'
 import { DisputesPage } from '@/pages/admin/disputes'
 import { AdminUsersPage } from '@/pages/admin/users'
 import { AdminAnalyticsPage } from '@/pages/admin/analytics'
@@ -114,7 +119,18 @@ const router = createBrowserRouter([
       { index: true, element: <AdminOverviewPage /> },
       { path: 'moderation', element: <ModerationPage /> },
       { path: 'users', element: <AdminUsersPage /> },
-      { path: 'config', element: <ConfigConsolePage /> },
+      {
+        path: 'config',
+        element: <Outlet />,
+        children: [
+          { index: true, element: <ConfigConsolePage /> },
+          { path: 'taxonomy', element: <CategoryTaxonomyPage /> },
+          { path: 'schemas', element: <ListingSchemasPage /> },
+          { path: 'fees', element: <FeesCommissionsPage /> },
+          { path: 'feature-flags', element: <FeatureFlagsPage /> },
+          { path: 'settings', element: <MarketplaceSettingsPage /> },
+        ],
+      },
       { path: 'disputes', element: <DisputesPage /> },
       { path: 'analytics', element: <AdminAnalyticsPage /> },
     ],

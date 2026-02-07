@@ -8,8 +8,19 @@ export function useCreateListing() {
   const queryClient = useQueryClient()
 
   const createDraft = useMutation({
-    mutationFn: (data: Parameters<typeof listingsApi.createListing>[0]) =>
-      listingsApi.createListing({ ...data, status: 'draft' }),
+    mutationFn: async (data: Parameters<typeof listingsApi.createListing>[0]) => {
+      const listing = await listingsApi.createListing({ ...data, status: 'draft' })
+      try {
+        await listingsApi.createListingPageRecord({
+          title: data.title,
+          description: data.description,
+          status: 'draft',
+        })
+      } catch {
+        // Non-blocking: listing created, tracking record optional
+      }
+      return listing
+    },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: LISTINGS_KEY })
       toast.success('Draft saved')
@@ -18,8 +29,19 @@ export function useCreateListing() {
   })
 
   const createPublish = useMutation({
-    mutationFn: (data: Parameters<typeof listingsApi.createListing>[0]) =>
-      listingsApi.createListing({ ...data, status: 'active' }),
+    mutationFn: async (data: Parameters<typeof listingsApi.createListing>[0]) => {
+      const listing = await listingsApi.createListing({ ...data, status: 'active' })
+      try {
+        await listingsApi.createListingPageRecord({
+          title: data.title,
+          description: data.description,
+          status: 'active',
+        })
+      } catch {
+        // Non-blocking: listing created, tracking record optional
+      }
+      return listing
+    },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: LISTINGS_KEY })
       toast.success('Listing published')

@@ -32,8 +32,12 @@ function buildDynamicSchema(schemas: ListingFieldSchema[]) {
         : z.number().optional()
     } else if (s.type === 'checkbox') {
       shape[s.key] = z.boolean().optional()
-    } else if (s.type === 'multiselect') {
+    } else if (s.type === 'multiselect' || s.type === 'availability') {
       shape[s.key] = z.array(z.string()).optional()
+    } else if (s.type === 'date_range' || s.type === 'file') {
+      shape[s.key] = s.isRequired
+        ? z.string().min(1, `${s.label} is required`)
+        : z.string().optional()
     } else {
       shape[s.key] = s.isRequired
         ? z.string().min(1, `${s.label} is required`)
@@ -58,9 +62,19 @@ export default function CreateListingPage() {
     useCreateListing()
 
   useEffect(() => {
+    const prevTitle = document.title
+    const prevDesc = document.querySelector('meta[name="description"]')?.getAttribute('content')
     document.title = 'Create Listing | Marketplace'
+    let metaDesc = document.querySelector('meta[name="description"]')
+    if (!metaDesc) {
+      metaDesc = document.createElement('meta')
+      metaDesc.setAttribute('name', 'description')
+      document.head.appendChild(metaDesc)
+    }
+    metaDesc.setAttribute('content', 'Create and publish your marketplace listing with a dynamic form driven by category configuration.')
     return () => {
-      document.title = 'Marketplace'
+      document.title = prevTitle
+      if (prevDesc) metaDesc?.setAttribute('content', prevDesc)
     }
   }, [])
 
@@ -79,7 +93,11 @@ export default function CreateListingPage() {
       price: undefined as number | undefined,
       currency: 'USD',
       ...Object.fromEntries(
-        schemas.map((s) => [s.key, s.type === 'checkbox' ? false : ''])
+        schemas.map((s) => {
+          if (s.type === 'checkbox') return [s.key, false]
+          if (s.type === 'multiselect' || s.type === 'availability') return [s.key, []]
+          return [s.key, '']
+        })
       ),
     },
   })
@@ -134,14 +152,32 @@ export default function CreateListingPage() {
 
   return (
     <div className="mx-auto max-w-6xl space-y-8 animate-fade-in">
+      <nav aria-label="Breadcrumb" className="flex items-center gap-2 text-sm text-muted-foreground">
+        <Link
+          to="/dashboard/seller"
+          className="transition-colors hover:text-foreground"
+        >
+          Dashboard
+        </Link>
+        <ChevronRight className="h-4 w-4 shrink-0" aria-hidden />
+        <Link
+          to="/dashboard/seller/listings"
+          className="transition-colors hover:text-foreground"
+        >
+          Listings
+        </Link>
+        <ChevronRight className="h-4 w-4 shrink-0" aria-hidden />
+        <span className="font-medium text-foreground">Create Listing</span>
+      </nav>
       <div>
         <Link
           to="/dashboard/seller/listings"
-          className="text-sm text-primary hover:underline"
+          className="inline-flex items-center gap-1 text-sm text-primary transition-colors hover:underline hover:text-primary/80"
         >
-          ← Back to listings
+          <ChevronLeft className="h-4 w-4" />
+          Back to listings
         </Link>
-        <h1 className="mt-2 text-3xl font-bold text-foreground">
+        <h1 className="mt-2 text-3xl font-bold tracking-tight text-foreground">
           Create Listing
         </h1>
         <p className="mt-1 text-muted-foreground">

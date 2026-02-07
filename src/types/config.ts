@@ -28,10 +28,13 @@ export type FieldType =
   | 'multiselect'
   | 'checkbox'
   | 'date'
+  | 'date_range'
   | 'url'
   | 'email'
   | 'phone'
   | 'image'
+  | 'file'
+  | 'availability'
 
 /** Validation rule for a field */
 export interface FieldValidation {

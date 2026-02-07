@@ -39,6 +39,7 @@ import { EditListingPage } from '@/pages/listings/edit-listing'
 import { ListingDetailPage } from '@/pages/listings/listing-detail'
 import { SearchPage } from '@/pages/listings/search'
 import { CheckoutPage } from '@/pages/checkout'
+import PaymentPage from '@/pages/Checkout/PaymentPage'
 import { OrdersPage } from '@/pages/orders'
 import { CartPage } from '@/pages/cart'
 import { SellerOnboardingPage } from '@/pages/seller-onboarding'
@@ -64,7 +65,9 @@ const router = createBrowserRouter([
   { path: '/verify-email', element: <EmailVerificationPage /> },
   { path: '/search', element: <SearchPage /> },
   { path: '/cart', element: <CartPage /> },
-  { path: '/checkout', element: <CheckoutPage /> },
+  { path: '/checkout', element: <PaymentPage /> },
+  { path: '/checkout/payment', element: <PaymentPage /> },
+  { path: '/checkout-/-payment-page', element: <PaymentPage /> },
   { path: '/orders', element: <OrdersPage /> },
   {
     path: '/listings/create',
@@ -128,6 +131,7 @@ const router = createBrowserRouter([
     children: [
       { index: true, element: <SellerOverviewPage /> },
       { path: 'listings', element: <SellerListingsPage /> },
+      { path: 'create', element: <CreateListingPageLegacy /> },
       { path: 'orders', element: <SellerOrdersPage /> },
       { path: 'payouts', element: <SellerPayoutsPage /> },
       { path: 'settings', element: <SettingsPage /> },

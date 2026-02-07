@@ -1,6 +1,13 @@
-import { useCallback, useState } from 'react'
-import { Upload, X, ImageIcon, GripVertical } from 'lucide-react'
+import { useCallback, useState, useRef } from 'react'
+import { Upload, X, ImageIcon, GripVertical, Crop } from 'lucide-react'
 import { Button } from '@/components/ui/button'
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+  DialogFooter,
+} from '@/components/ui/dialog'
 import { cn } from '@/lib/utils'
 
 export interface MediaItem {
@@ -21,6 +28,52 @@ export interface MediaManagerProps {
 const DEFAULT_MAX_FILES = 10
 const DEFAULT_MAX_SIZE_MB = 5
 const DEFAULT_ACCEPTED = 'image/*,video/*'
+
+function cropImageToAspect(
+  sourceUrl: string,
+  aspectRatio: number = 16 / 9
+): Promise<Blob> {
+  return new Promise((resolve, reject) => {
+    const img = new Image()
+    img.crossOrigin = 'anonymous'
+    img.onload = () => {
+      const w = img.width
+      const h = img.height
+      const currentAspect = w / h
+      let sw: number
+      let sh: number
+      let sx: number
+      let sy: number
+      if (currentAspect > aspectRatio) {
+        sh = h
+        sw = h * aspectRatio
+        sx = (w - sw) / 2
+        sy = 0
+      } else {
+        sw = w
+        sh = w / aspectRatio
+        sx = 0
+        sy = (h - sh) / 2
+      }
+      const canvas = document.createElement('canvas')
+      canvas.width = sw
+      canvas.height = sh
+      const ctx = canvas.getContext('2d')
+      if (!ctx) {
+        reject(new Error('Canvas not supported'))
+        return
+      }
+      ctx.drawImage(img, sx, sy, sw, sh, 0, 0, sw, sh)
+      canvas.toBlob(
+        (blob) => resolve(blob || new Blob()),
+        'image/jpeg',
+        0.9
+      )
+    }
+    img.onerror = () => reject(new Error('Failed to load image'))
+    img.src = sourceUrl
+  })
+}
 
 function compressImage(file: File, maxSizeMB: number): Promise<Blob> {
   return new Promise((resolve) => {

@@ -1,5 +1,5 @@
 import { Link } from 'react-router-dom'
-import { DollarSign, Users, Flag, Settings, BarChart3 } from 'lucide-react'
+import { DollarSign, Users, Flag, Settings, BarChart3, AlertTriangle } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
 import { Skeleton } from '@/components/ui/skeleton'
@@ -8,18 +8,20 @@ export function AdminOverviewPage() {
   const isLoading = false
   const gmv = 48920
   const activeUsers = 1240
-  const pendingModeration = 12
+  const flaggedContent = 12
   const openDisputes = 3
 
   return (
-    <div className="space-y-8">
+    <div className="space-y-8 animate-fade-in">
       <div>
-        <h1 className="text-3xl font-bold text-[#222222]">Admin Dashboard</h1>
-        <p className="mt-1 text-[#555555]">Platform control center</p>
+        <h1 className="text-3xl font-bold text-foreground">Admin Dashboard</h1>
+        <p className="mt-1 text-muted-foreground">
+          Platform control center – users, content, disputes, and metrics
+        </p>
       </div>
 
       <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-4">
-        <Card>
+        <Card className="transition-all duration-300 hover:shadow-card-hover">
           <CardHeader className="flex flex-row items-center justify-between pb-2">
             <CardTitle className="text-sm font-medium text-muted-foreground">GMV</CardTitle>
             <DollarSign className="h-4 w-4 text-muted-foreground" />
@@ -28,13 +30,13 @@ export function AdminOverviewPage() {
             {isLoading ? (
               <Skeleton className="h-8 w-24" />
             ) : (
-              <div className="text-2xl font-bold text-[#222222]">
+              <div className="text-2xl font-bold text-foreground">
                 ${gmv.toLocaleString()}
               </div>
             )}
           </CardContent>
         </Card>
-        <Card>
+        <Card className="transition-all duration-300 hover:shadow-card-hover">
           <CardHeader className="flex flex-row items-center justify-between pb-2">
             <CardTitle className="text-sm font-medium text-muted-foreground">
               Active Users
@@ -45,25 +47,25 @@ export function AdminOverviewPage() {
             {isLoading ? (
               <Skeleton className="h-8 w-16" />
             ) : (
-              <div className="text-2xl font-bold text-[#222222]">
+              <div className="text-2xl font-bold text-foreground">
                 {activeUsers.toLocaleString()}
               </div>
             )}
           </CardContent>
         </Card>
-        <Card>
+        <Card className="transition-all duration-300 hover:shadow-card-hover">
           <CardHeader className="flex flex-row items-center justify-between pb-2">
             <CardTitle className="text-sm font-medium text-muted-foreground">
-              Pending Moderation
+              Flagged Content
             </CardTitle>
-            <Flag className="h-4 w-4 text-muted-foreground" />
+            <AlertTriangle className="h-4 w-4 text-muted-foreground" />
           </CardHeader>
           <CardContent>
             {isLoading ? (
               <Skeleton className="h-8 w-16" />
             ) : (
               <>
-                <div className="text-2xl font-bold text-[#222222]">{pendingModeration}</div>
+                <div className="text-2xl font-bold text-foreground">{flaggedContent}</div>
                 <Link to="/dashboard/admin/moderation">
                   <Button variant="link" className="mt-2 h-auto p-0">
                     Review queue
@@ -73,7 +75,7 @@ export function AdminOverviewPage() {
             )}
           </CardContent>
         </Card>
-        <Card>
+        <Card className="transition-all duration-300 hover:shadow-card-hover">
           <CardHeader className="flex flex-row items-center justify-between pb-2">
             <CardTitle className="text-sm font-medium text-muted-foreground">
               Open Disputes
@@ -85,7 +87,7 @@ export function AdminOverviewPage() {
               <Skeleton className="h-8 w-16" />
             ) : (
               <>
-                <div className="text-2xl font-bold text-[#222222]">{openDisputes}</div>
+                <div className="text-2xl font-bold text-foreground">{openDisputes}</div>
                 <Link to="/dashboard/admin/disputes">
                   <Button variant="link" className="mt-2 h-auto p-0">
                     View cases

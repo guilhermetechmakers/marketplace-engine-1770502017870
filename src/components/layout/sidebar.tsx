@@ -10,6 +10,8 @@ import {
   Users,
   Wrench,
   BarChart3,
+  Flag,
+  Store,
 } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { cn } from '@/lib/utils'
@@ -31,6 +33,7 @@ const buyerNavItems: SidebarNavItem[] = [
 
 const sellerNavItems: SidebarNavItem[] = [
   { href: '/dashboard/seller', label: 'Overview', icon: LayoutDashboard },
+  { href: '/onboarding/seller', label: 'Complete Onboarding', icon: Store },
   { href: '/dashboard/seller/listings', label: 'Listings', icon: Package },
   { href: '/dashboard/seller/orders', label: 'Orders', icon: ShoppingBag },
   { href: '/dashboard/seller/payouts', label: 'Payouts', icon: BarChart3 },
@@ -42,7 +45,8 @@ const adminNavItems: SidebarNavItem[] = [
   { href: '/dashboard/admin/moderation', label: 'Moderation', icon: Wrench },
   { href: '/dashboard/admin/users', label: 'Users', icon: Users },
   { href: '/dashboard/admin/config', label: 'Configuration', icon: Settings },
-  { href: '/dashboard/admin/disputes', label: 'Disputes', icon: Wrench },
+  { href: '/dashboard/admin/disputes', label: 'Disputes', icon: Flag },
+  { href: '/dashboard/admin/analytics', label: 'Analytics', icon: BarChart3 },
 ]
 
 const navItemsByRole: Record<DashboardRole, SidebarNavItem[]> = {

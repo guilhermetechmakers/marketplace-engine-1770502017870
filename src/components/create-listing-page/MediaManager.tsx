@@ -1,4 +1,4 @@
-import { useCallback, useState, useRef } from 'react'
+import { useCallback, useState } from 'react'
 import { Upload, X, ImageIcon, GripVertical, Crop } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import {
@@ -124,6 +124,8 @@ export function MediaManager({
 }: MediaManagerProps) {
   const [isDragging, setIsDragging] = useState(false)
   const [uploadError, setUploadError] = useState<string | null>(null)
+  const [croppingItem, setCroppingItem] = useState<MediaItem | null>(null)
+  const [isCropping, setIsCropping] = useState(false)
 
   const processFile = useCallback(
     async (file: File): Promise<MediaItem | null> => {
@@ -213,6 +215,30 @@ export function MediaManager({
     onMediaChange(copy)
   }
 
+  const applyCrop = async () => {
+    if (!croppingItem || croppingItem.type !== 'image') return
+    setIsCropping(true)
+    try {
+      const blob = await cropImageToAspect(croppingItem.url, 16 / 9)
+      const url = URL.createObjectURL(blob)
+      const file = new File([blob], croppingItem.file?.name || 'cropped.jpg', {
+        type: 'image/jpeg',
+      })
+      const updated = media.map((m) =>
+        m.id === croppingItem.id
+          ? { ...m, url, file, type: 'image' as const }
+          : m
+      )
+      if (croppingItem.url) URL.revokeObjectURL(croppingItem.url)
+      onMediaChange(updated)
+      setCroppingItem(null)
+    } catch {
+      setUploadError('Failed to crop image')
+    } finally {
+      setIsCropping(false)
+    }
+  }
+
   return (
     <div className="space-y-4">
       <div
@@ -273,38 +299,47 @@ export function MediaManager({
                     playsInline
                   />
                 )}
-                <div className="absolute inset-0 flex items-center justify-center bg-black/40 opacity-0 transition-opacity group-hover:opacity-100">
-                  <div className="flex gap-2">
+                <div className="absolute inset-0 flex items-center justify-center gap-2 bg-black/40 opacity-0 transition-opacity group-hover:opacity-100">
+                  {item.type === 'image' && (
                     <Button
                       type="button"
                       variant="secondary"
                       size="icon-sm"
-                      onClick={() => moveItem(index, -1)}
-                      disabled={index === 0}
-                      aria-label="Move left"
+                      onClick={() => setCroppingItem(item)}
+                      aria-label="Crop image"
                     >
-                      <GripVertical className="h-4 w-4 rotate-90" />
+                      <Crop className="h-4 w-4" />
                     </Button>
-                    <Button
-                      type="button"
-                      variant="destructive"
-                      size="icon-sm"
-                      onClick={() => removeItem(item.id)}
-                      aria-label="Remove"
-                    >
-                      <X className="h-4 w-4" />
-                    </Button>
-                    <Button
-                      type="button"
-                      variant="secondary"
-                      size="icon-sm"
-                      onClick={() => moveItem(index, 1)}
-                      disabled={index === media.length - 1}
-                      aria-label="Move right"
-                    >
-                      <GripVertical className="h-4 w-4 -rotate-90" />
-                    </Button>
-                  </div>
+                  )}
+                  <Button
+                    type="button"
+                    variant="secondary"
+                    size="icon-sm"
+                    onClick={() => moveItem(index, -1)}
+                    disabled={index === 0}
+                    aria-label="Move left"
+                  >
+                    <GripVertical className="h-4 w-4 rotate-90" />
+                  </Button>
+                  <Button
+                    type="button"
+                    variant="destructive"
+                    size="icon-sm"
+                    onClick={() => removeItem(item.id)}
+                    aria-label="Remove"
+                  >
+                    <X className="h-4 w-4" />
+                  </Button>
+                  <Button
+                    type="button"
+                    variant="secondary"
+                    size="icon-sm"
+                    onClick={() => moveItem(index, 1)}
+                    disabled={index === media.length - 1}
+                    aria-label="Move right"
+                  >
+                    <GripVertical className="h-4 w-4 -rotate-90" />
+                  </Button>
                 </div>
               </div>
               <div className="mt-2 flex items-center gap-2 text-xs text-muted-foreground">
@@ -319,6 +354,40 @@ export function MediaManager({
           ))}
         </div>
       )}
+
+      <Dialog open={!!croppingItem} onOpenChange={(open) => !open && setCroppingItem(null)}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>Crop Image</DialogTitle>
+          </DialogHeader>
+          {croppingItem?.type === 'image' && (
+            <div className="overflow-hidden rounded-lg border bg-muted">
+              <img
+                src={croppingItem.url}
+                alt="Crop preview"
+                className="max-h-[300px] w-full object-contain"
+              />
+            </div>
+          )}
+          <p className="text-sm text-muted-foreground">
+            Center crop to 16:9 aspect ratio for optimal display.
+          </p>
+          <DialogFooter>
+            <Button
+              variant="outline"
+              onClick={() => setCroppingItem(null)}
+            >
+              Cancel
+            </Button>
+            <Button
+              onClick={applyCrop}
+              disabled={isCropping}
+            >
+              {isCropping ? 'Cropping...' : 'Apply Crop'}
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
     </div>
   )
 }

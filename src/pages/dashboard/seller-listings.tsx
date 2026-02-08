@@ -101,7 +101,7 @@ export function SellerListingsPage() {
             Manage your listings: edit, publish, unpublish, and respond to moderation
           </p>
         </div>
-        <Link to="/listings/create">
+        <Link to="/dashboard/seller/create">
           <Button className="transition-transform hover:scale-[1.02]">
             <PlusCircle className="mr-2 h-4 w-4" />
             Create Listing
@@ -169,7 +169,7 @@ export function SellerListingsPage() {
                   : 'Try adjusting your search or filters'}
               </p>
               {listings.length === 0 && (
-                <Link to="/listings/create">
+                <Link to="/dashboard/seller/create">
                   <Button className="mt-4 transition-transform hover:scale-[1.02]">
                     <PlusCircle className="mr-2 h-4 w-4" />
                     Create your first listing

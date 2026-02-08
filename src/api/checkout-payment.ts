@@ -54,10 +54,18 @@ export async function validatePromoCode(code: string): Promise<{
   message?: string
 }> {
   return tryApi(
-    async () => api.post<{ valid: boolean; discountAmount?: number; discountPercent?: number; message?: string }>(
-      '/checkout/validate-promo',
-      { code }
-    ),
-    () => ({ valid: false, message: 'Promo code not found' })
+    async () =>
+      api.post<{
+        valid: boolean
+        discountAmount?: number
+        discountPercent?: number
+        message?: string
+      }>('/checkout/validate-promo', { code }),
+    () => {
+      const upper = code.toUpperCase()
+      if (upper === 'SAVE10') return { valid: true, discountAmount: 10 }
+      if (upper === 'TEST20') return { valid: true, discountPercent: 20 }
+      return { valid: false, message: 'Promo code not found' }
+    }
   )
 }

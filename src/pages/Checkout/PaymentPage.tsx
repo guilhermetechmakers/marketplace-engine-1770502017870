@@ -22,7 +22,6 @@ import type {
   PromoResult,
   SavedPaymentMethod,
 } from '@/types/checkout-payment'
-import { cn } from '@/lib/utils'
 
 const PLATFORM_FEE_RATE = 0.03
 const COMMISSION_RATE = 0.05
@@ -106,14 +105,63 @@ export default function PaymentPage() {
 
   const breakdown = useMemo(() => {
     const sub = items.reduce((s, i) => s + i.total, 0)
-    const discount = appliedPromo?.valid ? appliedPromo.discountAmount ?? 0 : 0
+    let discount = 0
+    if (appliedPromo?.valid) {
+      if (appliedPromo.discountPercent != null) {
+        discount = Math.round(sub * (appliedPromo.discountPercent / 100) * 100) / 100
+      } else {
+        discount = appliedPromo.discountAmount ?? 0
+      }
+    }
     return buildPriceBreakdown(sub, discount, appliedPromo)
   }, [items, appliedPromo])
 
-  const handlePayerSubmit = useCallback((data: PayerDetailsType) => {
-    setPayerDetails(data)
-    setState('review')
-  }, [])
+  const handlePlaceOrder = useCallback(
+    async (payerData?: PayerDetailsType) => {
+      if (!policyAccepted) {
+        setPolicyError('You must accept the cancellation and refund policies')
+        return
+      }
+      const details = payerData ?? payerDetails
+      if (!details) {
+        setPolicyError('Please complete your billing details')
+        return
+      }
+      setPolicyError(null)
+
+      setIsProcessing(true)
+      setProcessingError(null)
+      setState('processing')
+
+      try {
+        await new Promise((r) => setTimeout(r, 1500))
+        const id = `ord_${Date.now()}`
+        setOrderId(id)
+        setState('success')
+        toast.success('Order placed successfully')
+      } catch (err) {
+        setProcessingError(err instanceof Error ? err.message : 'Payment failed')
+        setState('failure')
+        toast.error('Payment failed')
+      } finally {
+        setIsProcessing(false)
+      }
+    },
+    [policyAccepted, payerDetails]
+  )
+
+  const handleFormSubmitForPlaceOrder = useCallback(
+    (data: PayerDetailsType) => {
+      if (!policyAccepted) {
+        setPolicyError('You must accept the cancellation and refund policies')
+        return
+      }
+      setPolicyError(null)
+      setPayerDetails(data)
+      handlePlaceOrder(data)
+    },
+    [handlePlaceOrder, policyAccepted]
+  )
 
   const handleApplyPromo = useCallback(async (code: string) => {
     const result = await validatePromoCode(code)
@@ -129,32 +177,6 @@ export default function PaymentPage() {
       throw new Error(result.message ?? 'Invalid promo code')
     }
   }, [])
-
-  const handlePlaceOrder = useCallback(async () => {
-    if (!policyAccepted) {
-      setPolicyError('You must accept the cancellation and refund policies')
-      return
-    }
-    setPolicyError(null)
-
-    setIsProcessing(true)
-    setProcessingError(null)
-    setState('processing')
-
-    try {
-      await new Promise((r) => setTimeout(r, 1500))
-      const id = `ord_${Date.now()}`
-      setOrderId(id)
-      setState('success')
-      toast.success('Order placed successfully')
-    } catch (err) {
-      setProcessingError(err instanceof Error ? err.message : 'Payment failed')
-      setState('failure')
-      toast.error('Payment failed')
-    } finally {
-      setIsProcessing(false)
-    }
-  }, [policyAccepted])
 
   const handleRetry = useCallback(() => {
     setState('review')
@@ -252,8 +274,8 @@ export default function PaymentPage() {
           <div className="lg:col-span-3 space-y-6">
             <PayerDetails
               defaultValues={payerDetails ?? undefined}
-              onSubmit={handlePayerSubmit}
-              isLoading={isProcessing}
+              onSubmit={handleFormSubmitForPlaceOrder}
+              disabled={isProcessing}
               className="animate-fade-in"
             />
             <PaymentMethods
@@ -281,9 +303,12 @@ export default function PaymentPage() {
               disabled={isProcessing}
             />
             <PlaceOrderButton
-              onClick={handlePlaceOrder}
+              onClick={() => {
+                const form = document.getElementById('payer-details-form') as HTMLFormElement
+                form?.requestSubmit()
+              }}
               isLoading={isProcessing}
-              disabled={!policyAccepted || !payerDetails || isProcessing}
+              disabled={!policyAccepted || isProcessing}
               label={transactionType === 'booking' ? 'Confirm Booking' : 'Place Order'}
             />
           </div>

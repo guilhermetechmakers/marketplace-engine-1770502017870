@@ -74,12 +74,14 @@ export function PromoCodeDiscounts({
           <p className="text-sm text-destructive mb-2">{applyError}</p>
         )}
 
-        {appliedCode && discountAmount > 0 ? (
-          <div className="flex items-center justify-between rounded-lg border border-green-200 bg-green-50 dark:border-green-800 dark:bg-green-950/30 p-4">
+        {appliedCode && (discountAmount > 0 || (appliedPromo?.discountPercent ?? 0) > 0) ? (
+          <div className="flex items-center justify-between rounded-lg border border-primary/30 bg-primary/5 p-4">
             <div>
-              <p className="font-medium text-green-700 dark:text-green-400">{appliedCode}</p>
+              <p className="font-medium text-foreground">{appliedCode}</p>
               <p className="text-sm text-muted-foreground">
-                {formatCurrency(discountAmount, currency)} discount applied
+                {appliedPromo?.discountPercent
+                  ? `${appliedPromo.discountPercent}% off`
+                  : `${formatCurrency(discountAmount, currency)} discount applied`}
               </p>
             </div>
             {onRemove && (

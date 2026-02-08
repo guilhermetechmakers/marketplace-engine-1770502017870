@@ -1,5 +1,5 @@
 export { OrderSummary } from './OrderSummary'
-export { PayerDetails, PayerDetailsForm, toPayerDetails } from './PayerDetails'
+export { PayerDetails, toPayerDetails } from './PayerDetails'
 export { PaymentMethods } from './PaymentMethods'
 export { PromoCodeDiscounts } from './PromoCodeDiscounts'
 export { PolicyAcceptance } from './PolicyAcceptance'

@@ -95,6 +95,19 @@ function getMockSchemas(): ListingFieldSchema[] {
       createdAt: new Date().toISOString(),
       updatedAt: new Date().toISOString(),
     },
+    {
+      id: '5',
+      categoryId: '1',
+      key: 'availability',
+      label: 'Availability',
+      type: 'availability',
+      isRequired: false,
+      validations: [],
+      order: 4,
+      description: 'Select dates when this item is available',
+      createdAt: new Date().toISOString(),
+      updatedAt: new Date().toISOString(),
+    },
   ]
 }
 
